@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dark Luxury Planner</title>
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn-font@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Supabase SDK JS (سازگار و بدون تحریم) -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+<div class="app-container">
+    <!-- هدر -->
+    <header class="date-header">
+        <button class="nav-btn" id="prevDayBtn">روز قبل ◀</button>
+
+        <div class="date-info">
+            <div class="day-name" id="dayName">امروز</div>
+            <div class="dates-wrapper">
+                <span class="shamsi-date" id="shamsiDate">--</span>
+                <span class="divider">|</span>
+                <span class="gregorian-date" id="gregorianDate">--</span>
+            </div>
+        </div>
+
+        <div class="header-left-actions">
+            <button class="nav-btn" id="nextDayBtn">▶ روز بعد</button>
+            <div class="sync-status" id="syncStatus">
+                <span class="sync-dot green" id="syncDot"></span>
+                <span id="syncText">همگام شد</span>
+            </div>
+            <button class="menu-btn" id="menuBtn">☰</button>
+        </div>
+    </header>
+
+    <!-- منوی کشویی -->
+    <div class="side-menu-overlay" id="menuOverlay"></div>
+    <aside class="side-menu" id="sideMenu">
+        <div class="menu-header">
+            <h3>⚙️ تنظیمات و پشتیبان‌گیری</h3>
+            <button class="close-menu" id="closeMenuBtn">✕</button>
+        </div>
+
+        <section class="menu-section">
+            <h4>💾 پشتیبان‌گیری (آفلاین)</h4>
+            <div class="backup-buttons">
+                <button class="btn-backup export" id="exportBtn">📥 دانلود فایل بک‌آپ</button>
+                <label class="btn-backup import">
+                    📤 بازگردانی فایل بک‌آپ
+                    <input type="file" id="importFile" accept=".json" style="display:none;">
+                </label>
+            </div>
+        </section>
+    </aside>
+
+    <!-- تب‌ها -->
+    <nav class="tab-nav" id="tabNav">
+        <button class="tab-btn active" data-tab="daily">روزانه</button>
+    </nav>
+
+    <!-- محتوای روزانه -->
+    <main id="dailyTab" class="tab-content active">
+        <div class="desktop-grid">
+            <div class="left-column">
+                <section class="chart-section card">
+                    <h3>📊 میزان پیشرفت امروز</h3>
+                    <div class="chart-container">
+                        <canvas id="dailyChart"></canvas>
+                    </div>
+                    <div class="total-progress">
+                        <span>پیشرفت کل:</span>
+                        <strong id="totalPercent">0%</strong>
+                    </div>
+                </section>
+            </div>
+
+            <div class="right-column">
+                <section class="habits-section card">
+                    <h3>⚡ عادات ثابت (خودکار برای روزهای بعد)</h3>
+                    <div class="input-group">
+                        <input type="text" id="habitInput" placeholder="عادت جدید...">
+                        <button id="addHabitBtn">افزودن</button>
+                    </div>
+                    <ul id="habitsList" class="todo-list"></ul>
+                </section>
+
+                <section class="tasks-section card">
+                    <h3>🎯 کارهای امروز</h3>
+                    <div class="input-group">
+                        <input type="text" id="taskInput" placeholder="کار جدید...">
+                        <button id="addTaskBtn">افزودن</button>
+                    </div>
+                    <ul id="tasksList" class="todo-list"></ul>
+                </section>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

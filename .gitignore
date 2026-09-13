@@ -1,0 +1,30 @@
+*.iml
+.gradle
+/local.properties
+local.properties
+
+# Android Studio / IntelliJ IDEA
+.idea/
+*.iws
+*.ipr
+/captures
+.externalNativeBuild
+.cxx
+
+# Build outputs
+/build
+app/build/
+**/build/
+*.apk
+*.aab
+*.ap_
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Archives & Temporary
+*.rar
+*.zip
+*.tar.gz
+*.log
