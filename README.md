@@ -3,7 +3,7 @@
 <div align="center">
 
 ![My Planner Banner](https://img.shields.io/badge/Platform-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)
-![Version](https://img.shields.io/badge/Version-3.1.0-F39C12?style=for-the-badge)
+![Version](https://img.shields.io/badge/Version-3.2.0-F39C12?style=for-the-badge)
 ![Kotlin](https://img.shields.io/badge/Kotlin-Native_Hybrid-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-00CEC9?style=for-the-badge)
 ![Telegram](https://img.shields.io/badge/Telegram-Mahdi__3A-229ED9?style=for-the-badge&logo=telegram&logoColor=white)
@@ -90,19 +90,17 @@ You can always download the latest pre-compiled **APK** directly from GitHub Rel
 My Planner is completely **free, ad-free, independent, and open-source**.  
 If this project has brought clarity, discipline, or value to your daily life, your sponsorship will directly empower ongoing maintenance, new features, and continuous updates. Thank you wholeheartedly for your support! 🙏❤️
 
-### 💎 International / Crypto Donation (USDT):
-| Asset | Value | Notes |
+### 💎 Crypto Donation (USDT):
+| Network | Wallet Address | Notes |
 | :--- | :--- | :--- |
-| **Currency** | **Tether (USDT)** | Stablecoin |
-| **Network** | **TRON (TRC-20)** | Fast & low fee |
-| **Wallet Address** | `TGXiDt6YFnxnvCBeL6GEYWxNiZzpdLzocp` | Tap to copy |
+| **TRON (TRC-20)** | `TGXiDt6YFnxnvCBeL6GEYWxNiZzpdLzocp` | TRON Network |
+| **BNB Smart Chain (BEP-20 / BSC)** | `0x7d85CCCc52f95dB137Fd83b019487C2747d923C9` | Binance Smart Chain |
 
-### 💳 Iranian Rial (Shetab / IBAN):
+### 💳 Iranian Rial (IBAN):
 | Details | Value | Bank / Name |
 | :--- | :--- | :--- |
 | **Account Holder** | **مهدی اکبری (Mahdi Akbari)** | Saman Bank |
-| **Card Number** | `6219861960904646` | Card-to-Card |
-| **IBAN (شبا)** | `IR590560611828005603767801` | Satna / Paya |
+| **IBAN (شماره شبا)** | `IR590560611828005603767801` | Satna / Paya |
 
 ---
 

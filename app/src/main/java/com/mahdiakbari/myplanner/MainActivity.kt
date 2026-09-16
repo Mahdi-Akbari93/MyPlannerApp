@@ -34,6 +34,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import org.json.JSONObject
 import java.io.File
 import java.io.FileWriter
 
@@ -61,13 +62,17 @@ class MainActivity : ComponentActivity() {
 
         checkPermissions()
         ReminderScheduler.createNotificationChannel(this)
-        createBackupNotificationChannel(this)
+        BackupScheduler.createBackupNotificationChannel(this)
 
         // بازسازی آلارم‌ها و جبران فوری اعلان‌های جامانده به محض باز شدن برنامه توسط کاربر
         ReminderScheduler.rescheduleAllDailyReminders(this)
         ReminderScheduler.rescheduleAllCustomReminders(this)
         ReminderScheduler.reschedulePeriodicReminder(this)
         ReminderScheduler.rescheduleAllOneOffReminders(this)
+
+        // زمان‌بندی و بررسی بک‌آپ خودکار روزانه
+        BackupScheduler.scheduleDailyAutoBackup(this)
+        BackupScheduler.checkMissedBackup(this)
 
         val rootLayout = FrameLayout(this).apply {
             setBackgroundColor(Color.parseColor("#0d0f12"))
@@ -500,66 +505,87 @@ class MainActivity : ComponentActivity() {
         }
 
         @JavascriptInterface
+        fun syncLatestBackupData(jsonContent: String) {
+            BackupScheduler.saveLatestDataCache(context, jsonContent)
+        }
+
+        @JavascriptInterface
+        fun getBackupSettings(): String {
+            val prefs = context.getSharedPreferences("planner_reminders_prefs", Context.MODE_PRIVATE)
+            val autoEnabled = prefs.getBoolean("auto_backup_enabled", true)
+            val hour = prefs.getInt("auto_backup_hour", 23)
+            val minute = prefs.getInt("auto_backup_minute", 30)
+            val cloudEnabled = prefs.getBoolean("backup_cloud_enabled", false)
+            val platform = prefs.getString("backup_platform", "bale") ?: "bale"
+            val botToken = prefs.getString("backup_bot_token", "") ?: ""
+            val chatId = prefs.getString("backup_chat_id", "") ?: ""
+
+            val json = JSONObject().apply {
+                put("autoEnabled", autoEnabled)
+                put("hour", hour)
+                put("minute", minute)
+                put("cloudEnabled", cloudEnabled)
+                put("platform", platform)
+                put("botToken", botToken)
+                put("chatId", chatId)
+            }
+            return json.toString()
+        }
+
+        @JavascriptInterface
+        fun saveBackupSettings(hour: Int, minute: Int, autoEnabled: Boolean, cloudEnabled: Boolean, platform: String, token: String, chatId: String) {
+            val prefs = context.getSharedPreferences("planner_reminders_prefs", Context.MODE_PRIVATE)
+            prefs.edit().apply {
+                putBoolean("auto_backup_enabled", autoEnabled)
+                putInt("auto_backup_hour", hour)
+                putInt("auto_backup_minute", minute)
+                putBoolean("backup_cloud_enabled", cloudEnabled)
+                putString("backup_platform", platform)
+                putString("backup_bot_token", token.trim())
+                putString("backup_chat_id", chatId.trim())
+                apply()
+            }
+            BackupScheduler.scheduleDailyAutoBackup(context)
+            runOnUiThread {
+                Toast.makeText(context, "تنظیمات بک‌آپ با موفقیت ذخیره شد ✅", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        @JavascriptInterface
+        fun testCloudConnection(platform: String, token: String, chatId: String) {
+            Thread {
+                val (success, message) = BackupCloudSender.testConnection(platform, token.trim(), chatId.trim())
+                runOnUiThread {
+                    if (success) {
+                        Toast.makeText(context, "اتصال به ${if (platform == "bale") "بله" else "تلگرام"} موفق بود! پیام تستی ارسال شد ✅", Toast.LENGTH_LONG).show()
+                    } else {
+                        Toast.makeText(context, "خطا در اتصال: $message", Toast.LENGTH_LONG).show()
+                    }
+                }
+            }.start()
+        }
+
+        @JavascriptInterface
         fun saveBackupToFile(jsonContent: String) {
-            saveToFileSystem(jsonContent, isAuto = false)
+            BackupScheduler.saveLatestDataCache(context, jsonContent)
+            Thread {
+                val (ok, msg) = BackupScheduler.performBackup(context, isAuto = false, directJson = jsonContent)
+                runOnUiThread {
+                    if (ok) {
+                        Toast.makeText(context, "بک‌آپ در Downloads/MyPlanner ذخیره شد!", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
+                    }
+                }
+            }.start()
         }
 
         @JavascriptInterface
         fun autoBackupToFile(jsonContent: String) {
-            saveToFileSystem(jsonContent, isAuto = true)
-        }
-
-        private fun saveToFileSystem(jsonContent: String, isAuto: Boolean) {
-            runOnUiThread {
-                try {
-                    val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-                    val mainFolder = File(downloadsDir, "MyPlanner")
-                    val subFolderName = if (isAuto) "Daily_Backup" else "Manual_Backup"
-                    val targetDir = File(mainFolder, subFolderName)
-
-                    if (!targetDir.exists()) {
-                        targetDir.mkdirs()
-                    }
-
-                    val prefix = if (isAuto) "auto_backup_daily_" else "manual_backup_"
-                    val fileName = "$prefix${System.currentTimeMillis()}.json"
-                    val file = File(targetDir, fileName)
-                    val writer = FileWriter(file)
-                    writer.write(jsonContent)
-                    writer.flush()
-                    writer.close()
-
-                    if (isAuto) {
-                        showBackupNotification(context, "💾 پشتیبان‌گیری خودکار", "نسخه پشتیبان روزانه با موفقیت در پوشه Downloads/MyPlanner ذخیره شد.")
-                    } else {
-                        showBackupNotification(context, "📥 پشتیبان‌گیری دستی", "نسخه بک آپ دستی در پوشه Downloads/MyPlanner ذخیره شد.")
-                        Toast.makeText(context, "بک آپ ذخیره شد!", Toast.LENGTH_SHORT).show()
-                    }
-                } catch (e: Exception) {
-                    if (!isAuto) {
-                        Toast.makeText(context, "خطا در ذخیره فایل بک آپ: ${e.message}", Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
-        }
-
-        private fun showBackupNotification(context: Context, title: String, message: String) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-                ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                return
-            }
-
-            val builder = NotificationCompat.Builder(context, "backup_notifications")
-                .setSmallIcon(android.R.drawable.ic_menu_save)
-                .setContentTitle(title)
-                .setContentText(message)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setDefaults(NotificationCompat.DEFAULT_ALL)
-                .setAutoCancel(true)
-
-            with(NotificationManagerCompat.from(context)) {
-                notify((System.currentTimeMillis() % 10000).toInt(), builder.build())
-            }
+            BackupScheduler.saveLatestDataCache(context, jsonContent)
+            Thread {
+                BackupScheduler.performBackup(context, isAuto = true, directJson = jsonContent)
+            }.start()
         }
 
         @JavascriptInterface

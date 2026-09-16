@@ -85,6 +85,7 @@
                     📤 بازگردانی فایل بک آپ
                     <input type="file" id="importFile" accept=".json" style="display:none;">
                 </label>
+                <button class="btn-backup" id="openBackupSettingsBtn" style="margin-top:6px; background:#1b212f; border:1px solid #3a455a; color:#00cec9;">☁️ تنظیمات بک‌آپ خودکار و ابری</button>
             </div>
         </section>
     </aside>
@@ -369,7 +370,7 @@
     <div class="modal-card" style="text-align:center;">
         <div style="font-size:2.5rem; margin-bottom:6px;">🚀</div>
         <h3 style="color:var(--accent-gold); font-size:1.1rem; margin:0 0 6px 0;">برنامه‌ریز هوشمند شخصی</h3>
-        <div style="font-size:0.75rem; color:#888; margin-bottom:12px;">نسخه 3.1.0 (Luxury Hybrid Edition)</div>
+        <div style="font-size:0.75rem; color:#888; margin-bottom:12px;">نسخه 3.2.0 (Luxury Cloud Edition)</div>
 
         <div style="background:#0d0f12; border:1px solid var(--card-border); border-radius:10px; padding:12px; text-align:right; font-size:0.82rem; line-height:1.6; color:#ddd; margin-bottom:15px;">
             <p style="margin:0 0 8px 0;">👤 <strong>سازنده:</strong> مهدی اکبری</p>
@@ -400,20 +401,11 @@
             <strong>مای‌پلنر</strong> رو با تمام عشقم ساختم تا روزهات منظم‌تر و رسیدن به هدف‌هات راحت‌تر بشه؛ بدون تبلیغات، کاملاً رایگان و مستقل. با دونیت کردن و حمایت مالیت می‌تونی بهم انگیزه و امکان بدی که این پروژه رو همیشه به‌روز نگه دارم و امکانات شگفت‌انگیز بیشتری بهش اضافه کنم. از لطف و محبتت صمیمانه سپاسگزارم! ☕❤️
         </div>
 
-        <!-- کارت به کارت و شبا -->
+        <!-- شماره شبا بانک سامان -->
         <div class="donate-card" style="background:linear-gradient(135deg, #151922, #1b212f); border:1px solid #2d3748; border-radius:12px; padding:14px; margin-bottom:12px; text-align:right; box-shadow:0 4px 14px rgba(0,0,0,0.3);">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                <span style="font-weight:bold; color:var(--accent-gold); font-size:0.88rem;">💳 کارت به کارت (بانک سامان)</span>
-                <span style="font-size:0.8rem; color:#f1c40f; font-weight:bold;">مهدی اکبری</span>
-            </div>
-            
-            <div style="background:#0d0f12; border:1px dashed #3a455a; border-radius:8px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                <span style="font-family:monospace; font-size:1.05rem; letter-spacing:1.5px; color:#fff; font-weight:bold;" dir="ltr">6219 8619 6090 4646</span>
-                <button class="btn-copy-action" onclick="copyDonateText('6219861960904646', 'شماره کارت')">📋 کپی کارت</button>
-            </div>
-
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                <span style="font-weight:bold; color:#00cec9; font-size:0.82rem;">🏦 شماره شبا (IBAN)</span>
+                <span style="font-weight:bold; color:var(--accent-gold); font-size:0.88rem;">🏦 شماره شبا (بانک سامان)</span>
+                <span style="font-size:0.8rem; color:#f1c40f; font-weight:bold;">مهدی اکبری</span>
             </div>
             <div style="background:#0d0f12; border:1px dashed #3a455a; border-radius:8px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;">
                 <span style="font-family:monospace; font-size:0.75rem; letter-spacing:0.8px; color:#ddd; word-break:break-all;" dir="ltr">IR590560611828005603767801</span>
@@ -421,15 +413,29 @@
             </div>
         </div>
 
-        <!-- تتر TRC-20 -->
+        <!-- تتر دلاری (USDT) - ترون و بایننس اسمارت چین -->
         <div class="donate-card" style="background:linear-gradient(135deg, #131d1b, #192723); border:1px solid #1abc9c44; border-radius:12px; padding:14px; margin-bottom:14px; text-align:right; box-shadow:0 4px 14px rgba(0,0,0,0.3);">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                 <span style="font-weight:bold; color:#2ecc71; font-size:0.88rem;">💎 تتر دلاری (USDT)</span>
-                <span style="font-size:0.72rem; background:#2ecc7122; color:#2ecc71; padding:2px 8px; border-radius:6px; font-weight:bold;">شبکه ترون (TRC-20)</span>
+                <span style="font-size:0.72rem; color:#aaa;">ارز دیجیتال</span>
             </div>
-            <div style="background:#0d0f12; border:1px dashed #1abc9c55; border-radius:8px; padding:8px 10px; display:flex; justify-content:space-between; align-items:center;">
-                <span style="font-family:monospace; font-size:0.75rem; color:#a8e6cf; word-break:break-all; text-align:left; max-width:68%;" dir="ltr">TGXiDt6YFnxnvCBeL6GEYWxNiZzpdLzocp</span>
-                <button class="btn-copy-action" style="background:#27ae60;" onclick="copyDonateText('TGXiDt6YFnxnvCBeL6GEYWxNiZzpdLzocp', 'آدرس تتر TRC-20')">📋 کپی ولت</button>
+
+            <!-- TRC-20 -->
+            <div style="margin-bottom:10px;">
+                <div style="font-size:0.73rem; color:#00cec9; margin-bottom:3px; font-weight:bold;">شبکه ترون (TRC-20):</div>
+                <div style="background:#0d0f12; border:1px dashed #1abc9c55; border-radius:8px; padding:6px 10px; display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-family:monospace; font-size:0.72rem; color:#a8e6cf; word-break:break-all; text-align:left; max-width:68%;" dir="ltr">TGXiDt6YFnxnvCBeL6GEYWxNiZzpdLzocp</span>
+                    <button class="btn-copy-action" style="background:#27ae60;" onclick="copyDonateText('TGXiDt6YFnxnvCBeL6GEYWxNiZzpdLzocp', 'آدرس تتر TRC-20')">📋 کپی TRC20</button>
+                </div>
+            </div>
+
+            <!-- BEP-20 -->
+            <div>
+                <div style="font-size:0.73rem; color:#f1c40f; margin-bottom:3px; font-weight:bold;">شبکه بی‌ان‌بی اسمارت چین (BEP-20 / BSC):</div>
+                <div style="background:#0d0f12; border:1px dashed #f1c40f55; border-radius:8px; padding:6px 10px; display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-family:monospace; font-size:0.72rem; color:#ffeaa7; word-break:break-all; text-align:left; max-width:68%;" dir="ltr">0x7d85CCCc52f95dB137Fd83b019487C2747d923C9</span>
+                    <button class="btn-copy-action" style="background:#d35400;" onclick="copyDonateText('0x7d85CCCc52f95dB137Fd83b019487C2747d923C9', 'آدرس تتر BEP-20')">📋 کپی BEP20</button>
+                </div>
             </div>
         </div>
 
@@ -590,6 +596,72 @@
             <div style="font-size:0.8rem; color:#888; margin-bottom:4px;" id="reportAvgTitle">میانگین پایبندی ماه:</div>
             <div id="reportAvgPercent" style="font-size:1.5rem; font-weight:bold; color:#f1c40f;">0%</div>
             <p id="reportMotivationalText" style="font-size:0.8rem; color:#e0e0e0; margin-top:8px; line-height:1.4;"></p>
+        </div>
+    </div>
+</div>
+
+<!-- مدال تنظیمات بک‌آپ خودکار و ابری -->
+<div class="modal-overlay" id="backupSettingsModal">
+    <div class="modal-card" style="max-width:440px; text-align:right;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <h3 style="color:#00cec9; font-size:1.05rem; margin:0; display:flex; align-items:center; gap:6px;">☁️ تنظیمات بک‌آپ خودکار و ابری</h3>
+            <button id="closeBackupSettingsBtn" style="background:none; border:none; color:#fff; font-size:1.2rem; cursor:pointer;">✕</button>
+        </div>
+
+        <div style="font-size:0.8rem; color:#aaa; line-height:1.6; background:#0d0f12; padding:10px 12px; border-radius:8px; border:1px solid #222633; margin-bottom:12px;">
+            با فعال کردن این بخش، برنامه حتی بدون نیاز به باز بودن در ساعت مقرر از تمام اطلاعات شما فایل پشتیبان در پوشه <strong>Downloads/MyPlanner</strong> تهیه می‌کند و در صورت تمایل مستقیماً به پیام‌رسان دلخواه شما می‌فرستد.
+        </div>
+
+        <!-- بخش بکاپ خودکار -->
+        <div style="background:#151922; border:1px solid #2d3748; border-radius:10px; padding:12px; margin-bottom:12px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <label for="autoBackupToggle" style="font-weight:bold; font-size:0.88rem; color:#fff; cursor:pointer;">⏰ فعال‌سازی بک‌آپ خودکار روزانه</label>
+                <input type="checkbox" id="autoBackupToggle" style="width:18px; height:18px; cursor:pointer;" checked>
+            </div>
+            <div style="display:flex; align-items:center; gap:8px; margin-top:6px;">
+                <span style="font-size:0.8rem; color:#bbb;">ساعت اجرای پشتیبان‌گیری:</span>
+                <input type="time" id="autoBackupTime" value="23:30" style="background:#0d0f12; color:var(--accent-gold); border:1px solid #3a455a; padding:5px 8px; border-radius:6px; font-family:inherit; font-size:0.85rem;">
+            </div>
+            <div style="font-size:0.72rem; color:#888; margin-top:6px;">اگر در زمان مقرر گوشی خاموش باشد، به محض روشن شدن بعدی انجام خواهد شد.</div>
+        </div>
+
+        <!-- بخش ارسال به پیام‌رسان -->
+        <div style="background:#151922; border:1px solid #2d3748; border-radius:10px; padding:12px; margin-bottom:14px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <label for="cloudBackupToggle" style="font-weight:bold; font-size:0.88rem; color:#00cec9; cursor:pointer;">🚀 ارسال بک‌آپ به پیام‌رسان (Cloud)</label>
+                <input type="checkbox" id="cloudBackupToggle" style="width:18px; height:18px; cursor:pointer;">
+            </div>
+
+            <div id="cloudFieldsContainer" style="display:none; flex-direction:column; gap:10px; margin-top:8px;">
+                <div>
+                    <label style="font-size:0.8rem; color:#bbb; display:block; margin-bottom:4px;">انتخاب پیام‌رسان مقصد:</label>
+                    <select id="cloudPlatformSelect" style="width:100%; background:#0d0f12; color:#fff; border:1px solid #3a455a; padding:8px; border-radius:6px; font-family:inherit; font-size:0.85rem;">
+                        <option value="bale" selected>پیام‌رسان بله (ایران - بدون فیلترشکن و پرسرعت) ✅</option>
+                        <option value="telegram">تلگرام Telegram (نیازمند VPN فعال روی گوشی)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label style="font-size:0.8rem; color:#bbb; display:block; margin-bottom:4px;">توکن ربات (Bot Token):</label>
+                    <input type="text" id="cloudBotToken" placeholder="مثلاً: 123456789:ABCdefGhI..." dir="ltr" style="width:100%; background:#0d0f12; color:#fff; border:1px solid #3a455a; padding:8px; border-radius:6px; font-family:monospace; font-size:0.8rem;">
+                </div>
+
+                <div>
+                    <label style="font-size:0.8rem; color:#bbb; display:block; margin-bottom:4px;">شناسه چت، کانال یا کاربر (Chat ID):</label>
+                    <input type="text" id="cloudChatId" placeholder="مثلاً: 123456789 یا @my_channel" dir="ltr" style="width:100%; background:#0d0f12; color:#fff; border:1px solid #3a455a; padding:8px; border-radius:6px; font-family:monospace; font-size:0.8rem;">
+                </div>
+
+                <div style="font-size:0.72rem; color:#888; line-height:1.5; background:#0d0f12; padding:8px; border-radius:6px; border:1px dashed #2d3748;">
+                    💡 <strong>راهنما:</strong> در بله با ربات <strong>BotFather</strong> ربات بسازید و توکن را کپی کنید. برای دریافت Chat ID شخصی به ربات <strong>userinfobot</strong> در بله یا تلگرام یک پیام بفرستید.
+                </div>
+
+                <button type="button" id="testCloudConnectionBtn" class="btn-test" style="background:#27ae60; font-size:0.8rem; padding:8px;">📡 تست اتصال و ارسال پیام آزمایشی</button>
+            </div>
+        </div>
+
+        <div style="display:flex; gap:8px;">
+            <button type="button" id="saveBackupSettingsBtn" class="btn-test" style="background:linear-gradient(135deg, #00cec9, #0984e3); flex:1; font-weight:bold;">💾 ذخیره تنظیمات</button>
+            <button type="button" id="cancelBackupSettingsBtn" class="btn-test" style="background:#222633; flex:0.7;">بستن</button>
         </div>
     </div>
 </div>

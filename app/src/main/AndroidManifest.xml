@@ -20,6 +20,7 @@
 
     <!-- دسترسی ذخیره فایل بک‌آآپ در حافظه -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:allowBackup="true"
@@ -57,6 +58,9 @@
 
         <!-- دریافت‌کننده دکمه‌های «تمام» و «۱۵ دقیقه دیگه» روی نوتیف‌ها، و کشیدن/ردکردن نوتیف -->
         <receiver android:name=".NotificationActionReceiver" android:exported="false" />
+
+        <!-- دریافت‌کننده اجرای بک‌آپ خودکار در پس‌زمینه -->
+        <receiver android:name=".AutoBackupReceiver" android:exported="false" />
 
         <!-- دریافت‌کننده روشن شدن گوشی + آپدیت/نصب مجدد اپ؛ هردو باعث پاک شدن آلارم‌های قبلی میشن
              و باید یادآوری‌ها از نو (و با جبران عقب‌افتادگی) تنظیم بشن -->

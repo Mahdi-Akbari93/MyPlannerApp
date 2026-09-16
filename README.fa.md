@@ -3,7 +3,7 @@
 <div align="center">
 
 ![My Planner Banner](https://img.shields.io/badge/Platform-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)
-![Version](https://img.shields.io/badge/Version-3.1.0-F39C12?style=for-the-badge)
+![Version](https://img.shields.io/badge/Version-3.2.0-F39C12?style=for-the-badge)
 ![Kotlin](https://img.shields.io/badge/Kotlin-Native_Hybrid-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-00CEC9?style=for-the-badge)
 ![Telegram](https://img.shields.io/badge/Telegram-Mahdi__3A-229ED9?style=for-the-badge&logo=telegram&logoColor=white)
@@ -87,19 +87,17 @@
 این اپلیکیشن کاملاً **رایگان، بدون تبلیغات، مستقل و متن‌باز** توسعه داده شده است.  
 اگر مای‌پلنر توانسته به منظم‌تر شدن زندگی یا کارهایتان کمک کند، با حمایت مالی از این پروژه می‌توانید به من انرژی و انگیزه بدهید تا همیشه آن را به‌روز نگه دارم و امکانات بزرگ‌تری به آن اضافه کنم. صمیمانه از حمایت و همراهی شما سپاسگزارم! 🙏❤️
 
-### 💳 پرداخت ریالی (کارت به کارت / شبا):
+### 💳 پرداخت ریالی (شماره شبا):
 | مشخصه | مقدار | توضیحات |
 | :--- | :--- | :--- |
 | **صاحب حساب** | **مهدی اکبری** | بانک سامان |
-| **شماره کارت** | `6219861960904646` | کارت به کارت شتابی |
 | **شماره شبا (IBAN)** | `IR590560611828005603767801` | انتقال پایا / ساتنا |
 
 ### 💎 پرداخت ارزی (تتر USDT):
-| مشخصه | مقدار |
-| :--- | :--- |
-| **ارز** | **Tether (USDT)** |
-| **شبکه** | **TRON (TRC-20)** |
-| **آدرس ولت** | `TGXiDt6YFnxnvCBeL6GEYWxNiZzpdLzocp` |
+| شبکه | آدرس ولت | توضیحات |
+| :--- | :--- | :--- |
+| **TRON (TRC-20)** | `TGXiDt6YFnxnvCBeL6GEYWxNiZzpdLzocp` | شبکه ترون |
+| **BNB Smart Chain (BEP-20 / BSC)** | `0x7d85CCCc52f95dB137Fd83b019487C2747d923C9` | بایننس اسمارت چین |
 
 ---
 

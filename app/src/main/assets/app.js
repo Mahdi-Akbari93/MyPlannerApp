@@ -202,6 +202,7 @@ document.addEventListener("DOMContentLoaded", () => {
     loadReminderTimes();
     checkAutoBackup();
     updateInstallStreakCounter();
+    setTimeout(syncLatestBackupToAndroid, 2000);
 });
 
 function setupEventListeners() {
@@ -257,6 +258,34 @@ function setupEventListeners() {
     const importFileInput = document.getElementById('importFile');
     if (importFileInput) {
         importFileInput.onchange = importBackup;
+    }
+
+    const openBackupSettingsBtn = document.getElementById('openBackupSettingsBtn');
+    if (openBackupSettingsBtn) {
+        openBackupSettingsBtn.onclick = function() {
+            toggleMenu();
+            openBackupSettingsModal();
+        };
+    }
+
+    const closeBackupSettingsBtn = document.getElementById('closeBackupSettingsBtn');
+    if (closeBackupSettingsBtn) closeBackupSettingsBtn.onclick = closeBackupSettingsModal;
+
+    const cancelBackupSettingsBtn = document.getElementById('cancelBackupSettingsBtn');
+    if (cancelBackupSettingsBtn) cancelBackupSettingsBtn.onclick = closeBackupSettingsModal;
+
+    const saveBackupSettingsBtn = document.getElementById('saveBackupSettingsBtn');
+    if (saveBackupSettingsBtn) saveBackupSettingsBtn.onclick = saveBackupSettings;
+
+    const testCloudConnectionBtn = document.getElementById('testCloudConnectionBtn');
+    if (testCloudConnectionBtn) testCloudConnectionBtn.onclick = testCloudConnection;
+
+    const cloudBackupToggle = document.getElementById('cloudBackupToggle');
+    if (cloudBackupToggle) {
+        cloudBackupToggle.onchange = function() {
+            const container = document.getElementById('cloudFieldsContainer');
+            if (container) container.style.display = this.checked ? 'flex' : 'none';
+        };
     }
 
     document.getElementById('saveReminderBtn').onclick = saveReminderTimes;
@@ -1203,8 +1232,7 @@ function sendTaskToTomorrow(itemId, btnEl) {
     if (!target) return;
 
     const copiedSubtasks = (target.subtasks || [])
-        .filter(function(s) { return !s.completed; })
-        .map(function(s) { return { text: s.text, completed: false, note: s.note || '' }; });
+        .map(function(s) { return { text: s.text, completed: !!s.completed, note: s.note || '' }; });
 
     const newTask = {
         id: 't_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
@@ -3037,6 +3065,34 @@ function drawReportChart(labels, data, datasetLabel, color, bgColor) {
     }
 }
 
+let syncBackupDebounceTimer = null;
+function scheduleBackupSync() {
+    clearTimeout(syncBackupDebounceTimer);
+    syncBackupDebounceTimer = setTimeout(function() {
+        syncLatestBackupToAndroid();
+    }, 1200);
+}
+
+function syncLatestBackupToAndroid() {
+    if (window.AndroidInterface && window.AndroidInterface.syncLatestBackupData) {
+        try {
+            const dataStr = getBackupJSON();
+            window.AndroidInterface.syncLatestBackupData(dataStr);
+        } catch (e) {}
+    }
+}
+
+// همگام‌سازی خودکار آخرین داده‌ها در حافظه کش اندروید برای پشتیبان‌گیری پس‌زمینه
+(function() {
+    const origSetItem = localStorage.setItem.bind(localStorage);
+    localStorage.setItem = function(key, value) {
+        origSetItem(key, value);
+        if (typeof key === 'string' && key.startsWith('planner_')) {
+            scheduleBackupSync();
+        }
+    };
+})();
+
 function getBackupJSON() {
     const backupData = {};
     for (let i = 0; i < localStorage.length; i++) {
@@ -3048,6 +3104,7 @@ function getBackupJSON() {
 
 function exportBackup() {
     const jsonString = getBackupJSON();
+    syncLatestBackupToAndroid();
     if (window.AndroidInterface && window.AndroidInterface.saveBackupToFile) {
         window.AndroidInterface.saveBackupToFile(jsonString);
     } else {
@@ -3056,6 +3113,132 @@ function exportBackup() {
         a.href = URL.createObjectURL ? URL.createObjectURL(blob) : '';
         a.download = `planner_backup_${new Date().toISOString().split('T')[0]}.json`;
         a.click();
+    }
+}
+
+function openBackupSettingsModal() {
+    const modal = document.getElementById('backupSettingsModal');
+    if (!modal) return;
+
+    let settings = {
+        autoEnabled: true,
+        hour: 23,
+        minute: 30,
+        cloudEnabled: false,
+        platform: 'bale',
+        botToken: '',
+        chatId: ''
+    };
+
+    if (window.AndroidInterface && window.AndroidInterface.getBackupSettings) {
+        try {
+            const raw = window.AndroidInterface.getBackupSettings();
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                settings = Object.assign(settings, parsed);
+            }
+        } catch (e) {}
+    } else {
+        try {
+            const saved = localStorage.getItem('planner_auto_backup_settings');
+            if (saved) settings = Object.assign(settings, JSON.parse(saved));
+        } catch (e) {}
+    }
+
+    const autoToggle = document.getElementById('autoBackupToggle');
+    const autoTime = document.getElementById('autoBackupTime');
+    const cloudToggle = document.getElementById('cloudBackupToggle');
+    const cloudContainer = document.getElementById('cloudFieldsContainer');
+    const platformSelect = document.getElementById('cloudPlatformSelect');
+    const botTokenInput = document.getElementById('cloudBotToken');
+    const chatIdInput = document.getElementById('cloudChatId');
+
+    if (autoToggle) autoToggle.checked = !!settings.autoEnabled;
+    if (autoTime) {
+        const h = String(settings.hour !== undefined ? settings.hour : 23).padStart(2, '0');
+        const m = String(settings.minute !== undefined ? settings.minute : 30).padStart(2, '0');
+        autoTime.value = `${h}:${m}`;
+    }
+    if (cloudToggle) {
+        cloudToggle.checked = !!settings.cloudEnabled;
+        if (cloudContainer) {
+            cloudContainer.style.display = settings.cloudEnabled ? 'flex' : 'none';
+        }
+    }
+    if (platformSelect) platformSelect.value = settings.platform || 'bale';
+    if (botTokenInput) botTokenInput.value = settings.botToken || '';
+    if (chatIdInput) chatIdInput.value = settings.chatId || '';
+
+    modal.classList.add('open');
+}
+
+function closeBackupSettingsModal() {
+    const modal = document.getElementById('backupSettingsModal');
+    if (modal) modal.classList.remove('open');
+}
+
+function saveBackupSettings() {
+    const autoToggle = document.getElementById('autoBackupToggle');
+    const autoTime = document.getElementById('autoBackupTime');
+    const cloudToggle = document.getElementById('cloudBackupToggle');
+    const platformSelect = document.getElementById('cloudPlatformSelect');
+    const botTokenInput = document.getElementById('cloudBotToken');
+    const chatIdInput = document.getElementById('cloudChatId');
+
+    const autoEnabled = autoToggle ? autoToggle.checked : true;
+    const timeVal = (autoTime && autoTime.value) ? autoTime.value : '23:30';
+    const timeParts = timeVal.split(':');
+    const hour = parseInt(timeParts[0], 10) || 23;
+    const minute = parseInt(timeParts[1], 10) || 30;
+
+    const cloudEnabled = cloudToggle ? cloudToggle.checked : false;
+    const platform = platformSelect ? platformSelect.value : 'bale';
+    const botToken = botTokenInput ? botTokenInput.value.trim() : '';
+    const chatId = chatIdInput ? chatIdInput.value.trim() : '';
+
+    if (cloudEnabled && (!botToken || !chatId)) {
+        alert('لطفاً توکن ربات و شناسه چت (Chat ID) را برای ارسال ابری وارد کنید.');
+        return;
+    }
+
+    if (window.AndroidInterface && window.AndroidInterface.saveBackupSettings) {
+        window.AndroidInterface.saveBackupSettings(hour, minute, autoEnabled, cloudEnabled, platform, botToken, chatId);
+    } else {
+        alert('تنظیمات بک‌آپ با موفقیت ذخیره شد ✅');
+    }
+
+    localStorage.setItem('planner_auto_backup_settings', JSON.stringify({
+        autoEnabled: autoEnabled,
+        hour: hour,
+        minute: minute,
+        cloudEnabled: cloudEnabled,
+        platform: platform,
+        botToken: botToken,
+        chatId: chatId
+    }));
+
+    syncLatestBackupToAndroid();
+    closeBackupSettingsModal();
+}
+
+function testCloudConnection() {
+    const platformSelect = document.getElementById('cloudPlatformSelect');
+    const botTokenInput = document.getElementById('cloudBotToken');
+    const chatIdInput = document.getElementById('cloudChatId');
+
+    const platform = platformSelect ? platformSelect.value : 'bale';
+    const botToken = botTokenInput ? botTokenInput.value.trim() : '';
+    const chatId = chatIdInput ? chatIdInput.value.trim() : '';
+
+    if (!botToken || !chatId) {
+        alert('لطفاً ابتدا توکن ربات و شناسه چت را وارد کنید.');
+        return;
+    }
+
+    if (window.AndroidInterface && window.AndroidInterface.testCloudConnection) {
+        window.AndroidInterface.testCloudConnection(platform, botToken, chatId);
+    } else {
+        alert('تست اتصال فقط درون نسخه اندروید اجرا می‌شود.');
     }
 }
 

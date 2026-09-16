@@ -36,5 +36,6 @@ class BootReceiver : BroadcastReceiver() {
         ReminderScheduler.reschedulePeriodicReminder(context)
         ReminderScheduler.rescheduleAllOneOffReminders(context)
         ReminderScheduler.rescheduleAllTaskRepeatReminders(context)
+        BackupScheduler.scheduleDailyAutoBackup(context)
     }
 }
