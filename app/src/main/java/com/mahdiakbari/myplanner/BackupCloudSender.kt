@@ -95,9 +95,15 @@ object BackupCloudSender {
         }
 
         return try {
-            val baseUrl = getApiBaseUrl(platform)
-            val url = URL("$baseUrl/bot$token/sendDocument")
-            val boundary = "===Boundary" + System.currentTimeMillis() + "==="
+            val cleanPlatform = platform.lowercase().trim()
+            val cleanToken = token.trim()
+            val cleanChatId = chatId.trim()
+            val baseUrl = getApiBaseUrl(cleanPlatform)
+            val encodedChatId = java.net.URLEncoder.encode(cleanChatId, "UTF-8")
+            val url = URL("$baseUrl/bot$cleanToken/sendDocument?chat_id=$encodedChatId")
+
+            // استفاده از boundary کاملاً استاندارد بدون کاراکترهای = تا در پارسر multipart سرور بله/تلگرام خطا ایجاد نشود
+            val boundary = "MyPlannerBoundary" + System.currentTimeMillis()
             val lineEnd = "\r\n"
             val twoHyphens = "--"
 
@@ -107,41 +113,45 @@ object BackupCloudSender {
                 readTimeout = 30000
                 doOutput = true
                 useCaches = false
+                setRequestProperty("Connection", "Keep-Alive")
+                setRequestProperty("User-Agent", "MyPlanner/3.2.0")
                 setRequestProperty("Content-Type", "multipart/form-data; boundary=$boundary")
             }
 
-            DataOutputStream(conn.outputStream).use { dos ->
-                // ۱. فیلد chat_id
-                dos.writeBytes(twoHyphens + boundary + lineEnd)
-                dos.writeBytes("Content-Disposition: form-data; name=\"chat_id\"$lineEnd$lineEnd")
-                dos.writeBytes(chatId + lineEnd)
+            conn.outputStream.use { os ->
+                fun writeUtf8(text: String) {
+                    os.write(text.toByteArray(StandardCharsets.UTF_8))
+                }
 
-                // ۲. فیلد caption
-                if (caption.isNotEmpty()) {
-                    dos.writeBytes(twoHyphens + boundary + lineEnd)
-                    dos.writeBytes("Content-Disposition: form-data; name=\"caption\"$lineEnd")
-                    dos.writeBytes("Content-Type: text/plain; charset=UTF-8$lineEnd$lineEnd")
-                    dos.write(caption.toByteArray(StandardCharsets.UTF_8))
-                    dos.writeBytes(lineEnd)
+                // ۱. فیلد chat_id در بدنه multipart
+                writeUtf8("$twoHyphens$boundary$lineEnd")
+                writeUtf8("Content-Disposition: form-data; name=\"chat_id\"$lineEnd$lineEnd")
+                writeUtf8("$cleanChatId$lineEnd")
+
+                // ۲. فیلد caption (در صورت وجود)
+                if (caption.isNotBlank()) {
+                    writeUtf8("$twoHyphens$boundary$lineEnd")
+                    writeUtf8("Content-Disposition: form-data; name=\"caption\"$lineEnd$lineEnd")
+                    writeUtf8("$caption$lineEnd")
                 }
 
                 // ۳. فیلد document (فایل اصلی بکاپ)
-                dos.writeBytes(twoHyphens + boundary + lineEnd)
-                dos.writeBytes("Content-Disposition: form-data; name=\"document\"; filename=\"${backupFile.name}\"$lineEnd")
-                dos.writeBytes("Content-Type: application/json$lineEnd$lineEnd")
+                writeUtf8("$twoHyphens$boundary$lineEnd")
+                writeUtf8("Content-Disposition: form-data; name=\"document\"; filename=\"${backupFile.name}\"$lineEnd")
+                writeUtf8("Content-Type: application/octet-stream$lineEnd$lineEnd")
 
                 FileInputStream(backupFile).use { fis ->
                     val buffer = ByteArray(4096)
                     var bytesRead: Int
                     while (fis.read(buffer).also { bytesRead = it } != -1) {
-                        dos.write(buffer, 0, bytesRead)
+                        os.write(buffer, 0, bytesRead)
                     }
                 }
-                dos.writeBytes(lineEnd)
+                writeUtf8(lineEnd)
 
-                // پایان multipart
-                dos.writeBytes(twoHyphens + boundary + twoHyphens + lineEnd)
-                dos.flush()
+                // پایان بخش‌های multipart
+                writeUtf8("$twoHyphens$boundary$twoHyphens$lineEnd")
+                os.flush()
             }
 
             val responseCode = conn.responseCode
@@ -158,7 +168,7 @@ object BackupCloudSender {
             if (isOk) {
                 Pair(true, "فایل با موفقیت به پیام‌رسان ارسال شد.")
             } else {
-                val desc = jsonResponse?.optString("description", "خطا") ?: "کد $responseCode"
+                val desc = jsonResponse?.optString("description", "")?.ifEmpty { null } ?: responseText
                 Pair(false, "خطا در ارسال فایل: $desc")
             }
         } catch (e: Exception) {

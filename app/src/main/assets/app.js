@@ -3248,30 +3248,17 @@ function getLocalDateKey(d) {
 }
 
 function checkAutoBackup() {
-    // بک‌آپ روزانه: هر بار اپ بعد از عوض شدن تاریخِ روز (یعنی بعد از ساعت ۱۲ شب) باز بشه،
-    // یه بک‌آپ از داده‌های همون روزی که تازه تموم شده می‌گیره. این چک فقط موقع باز شدن
-    // اپ اجرا میشه (نه یه تایمر واقعی پس‌زمینه)، پس اگه چند روز اپ رو باز نکنی، به محض
-    // باز کردنش یه بک‌آپ از همون لحظه می‌گیره (نه بک‌آپِ روزهای ازدست‌رفته).
+    // در نسخه جدید (v3.2.0)، زمان‌بندی بک‌آپ خودکار و جبران زمان‌های خاموشی به صورت دقیق
+    // توسط سیستم نیتیو اندروید (BackupScheduler و AlarmManager) مدیریت می‌شود.
+    // بنابراین در اندروید کاری انجام نمی‌شود تا از ایجاد هرگونه بک‌آپ تکراری یا دوبل جلوگیری شود.
+    if (window.AndroidInterface) {
+        return;
+    }
+
     const todayKey = getLocalDateKey();
     const lastBackupDate = localStorage.getItem('planner_last_auto_backup_date');
-
-    if (!localStorage.getItem('planner_first_auto_backup_test_done')) {
-        setTimeout(function() {
-            const jsonString = getBackupJSON();
-            if (window.AndroidInterface && window.AndroidInterface.autoBackupToFile) {
-                window.AndroidInterface.autoBackupToFile(jsonString);
-                localStorage.setItem('planner_last_auto_backup_date', todayKey);
-                localStorage.setItem('planner_last_auto_backup_time', Date.now().toString());
-                localStorage.setItem('planner_first_auto_backup_test_done', 'true');
-            }
-        }, 60000);
-    } else if (lastBackupDate !== todayKey) {
-        const jsonString = getBackupJSON();
-        if (window.AndroidInterface && window.AndroidInterface.autoBackupToFile) {
-            window.AndroidInterface.autoBackupToFile(jsonString);
-            localStorage.setItem('planner_last_auto_backup_date', todayKey);
-            localStorage.setItem('planner_last_auto_backup_time', Date.now().toString());
-        }
+    if (lastBackupDate !== todayKey) {
+        localStorage.setItem('planner_last_auto_backup_date', todayKey);
     }
 }
 
