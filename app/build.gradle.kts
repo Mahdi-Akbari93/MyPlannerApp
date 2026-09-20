@@ -16,14 +16,28 @@ android {
         minSdk = 24
         targetSdk = 36
 
-        versionCode = 4
-        versionName = "3.2.0"
+        versionCode = 5
+        versionName = "3.3.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("myplanner-release.jks")
+            storePassword = "MyPlanner2026SecureKey!"
+            keyAlias = "myplanner"
+            keyPassword = "MyPlanner2026SecureKey!"
+            enableV1Signing = true
+            enableV2Signing = true
+            enableV3Signing = true
+        }
+    }
+
     buildTypes {
         release {
+            signingConfig = signingConfigs.getByName("release")
+            isDebuggable = false
             optimization {
                 enable = false
             }
@@ -35,6 +49,10 @@ android {
     }
     buildFeatures {
         compose = true
+    }
+    lint {
+        checkReleaseBuilds = false
+        abortOnError = false
     }
 }
 

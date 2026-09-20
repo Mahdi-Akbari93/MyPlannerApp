@@ -3,7 +3,7 @@
 <div align="center">
 
 ![My Planner Banner](https://img.shields.io/badge/Platform-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)
-![Version](https://img.shields.io/badge/Version-3.2.0-F39C12?style=for-the-badge)
+![Version](https://img.shields.io/badge/Version-3.3.0-F39C12?style=for-the-badge)
 ![Kotlin](https://img.shields.io/badge/Kotlin-Native_Hybrid-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-00CEC9?style=for-the-badge)
 ![Telegram](https://img.shields.io/badge/Telegram-Mahdi__3A-229ED9?style=for-the-badge&logo=telegram&logoColor=white)

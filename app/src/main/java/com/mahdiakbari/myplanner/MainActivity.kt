@@ -41,10 +41,25 @@ import java.io.FileWriter
 class MainActivity : ComponentActivity() {
     private lateinit var myWebView: WebView
     private lateinit var splashView: LinearLayout
+    private var isSplashDismissed = false
     private var filePathCallback: ValueCallback<Array<Uri>>? = null
 
     // وقتی روی نوتیف زده میشه، این تب همون لحظه (یا به‌محض تموم شدن بارگذاری صفحه) باز میشه
     private var pendingOpenTab: String? = null
+
+    private fun dismissSplash() {
+        if (isSplashDismissed) return
+        isSplashDismissed = true
+        if (::splashView.isInitialized) {
+            splashView.animate()
+                .alpha(0f)
+                .setDuration(300)
+                .withEndAction {
+                    splashView.visibility = View.GONE
+                    maybeShowPermissionOnboarding()
+                }
+        }
+    }
 
     private val fileChooserLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (filePathCallback == null) return@registerForActivityResult
@@ -130,13 +145,7 @@ class MainActivity : ComponentActivity() {
 
                 override fun onPageFinished(view: WebView?, url: String?) {
                     super.onPageFinished(view, url)
-                    splashView.animate()
-                        .alpha(0f)
-                        .setDuration(400)
-                        .withEndAction {
-                            splashView.visibility = View.GONE
-                            maybeShowPermissionOnboarding()
-                        }
+                    dismissSplash()
 
                     pendingOpenTab?.let { tab ->
                         myWebView.evaluateJavascript(
@@ -145,6 +154,16 @@ class MainActivity : ComponentActivity() {
                         )
                         pendingOpenTab = null
                     }
+                }
+
+                override fun onReceivedError(
+                    view: WebView?,
+                    errorCode: Int,
+                    description: String?,
+                    failingUrl: String?
+                ) {
+                    super.onReceivedError(view, errorCode, description, failingUrl)
+                    dismissSplash()
                 }
             }
 
@@ -216,6 +235,11 @@ class MainActivity : ComponentActivity() {
 
         rootLayout.addView(myWebView)
         rootLayout.addView(splashView)
+
+        // اطمینان از بسته شدن اسپلش تحت هر شرایطی حداکثر پس از ۱.۲ ثانیه
+        splashView.postDelayed({
+            dismissSplash()
+        }, 1200)
 
         setContentView(rootLayout)
 
@@ -561,6 +585,7 @@ class MainActivity : ComponentActivity() {
                     } else {
                         Toast.makeText(context, "خطا در اتصال: $message", Toast.LENGTH_LONG).show()
                     }
+                    myWebView.evaluateJavascript("if (typeof onCloudTestComplete === 'function') onCloudTestComplete($success, '${message.replace("'", "\\'")}');", null)
                 }
             }.start()
         }
@@ -576,6 +601,7 @@ class MainActivity : ComponentActivity() {
                     } else {
                         Toast.makeText(context, msg, Toast.LENGTH_LONG).show()
                     }
+                    myWebView.evaluateJavascript("if (typeof onBackupComplete === 'function') onBackupComplete($ok, '${msg.replace("'", "\\'")}');", null)
                 }
             }.start()
         }

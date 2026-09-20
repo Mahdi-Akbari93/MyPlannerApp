@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Dark Luxury Planner</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <script src="chart.min.js"></script>
+    <script src="confetti.min.js"></script>
 </head>
 <body>
 
@@ -32,6 +32,15 @@
             <button class="menu-btn" id="menuBtn">☰</button>
         </div>
     </header>
+
+    <!-- دکمه شناور و جذاب بازگشت به روز حال (فقط زمان مشاهده روزهای قبل/بعد ظاهر می‌شود) -->
+    <button id="returnToTodayBtn" class="return-today-btn hidden" aria-label="بازگشت به امروز">
+        <span class="return-icon">📅</span>
+        <div class="return-btn-content">
+            <span class="return-btn-title">بازگشت به امروز</span>
+            <span id="returnToTodayText" class="return-btn-badge">دیروز</span>
+        </div>
+    </button>
 
     <!-- منوی کشویی تنظیمات -->
     <div class="side-menu-overlay" id="menuOverlay"></div>
@@ -370,7 +379,7 @@
     <div class="modal-card" style="text-align:center;">
         <div style="font-size:2.5rem; margin-bottom:6px;">🚀</div>
         <h3 style="color:var(--accent-gold); font-size:1.1rem; margin:0 0 6px 0;">برنامه‌ریز هوشمند شخصی</h3>
-        <div style="font-size:0.75rem; color:#888; margin-bottom:12px;">نسخه 3.2.0 (Luxury Cloud Edition)</div>
+        <div style="font-size:0.75rem; color:#888; margin-bottom:12px;">نسخه 3.3.0 (Official Signed Edition)</div>
 
         <div style="background:#0d0f12; border:1px solid var(--card-border); border-radius:10px; padding:12px; text-align:right; font-size:0.82rem; line-height:1.6; color:#ddd; margin-bottom:15px;">
             <p style="margin:0 0 8px 0;">👤 <strong>سازنده:</strong> مهدی اکبری</p>

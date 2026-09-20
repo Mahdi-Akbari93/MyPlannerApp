@@ -214,6 +214,11 @@ function setupEventListeners() {
         changeDay(1);
     };
 
+    const returnToTodayBtn = document.getElementById('returnToTodayBtn');
+    if (returnToTodayBtn) {
+        returnToTodayBtn.onclick = returnToToday;
+    }
+
     document.getElementById('menuBtn').onclick = toggleMenu;
     document.getElementById('closeMenuBtn').onclick = toggleMenu;
     document.getElementById('menuOverlay').onclick = toggleMenu;
@@ -543,6 +548,38 @@ function updateDateDisplay() {
             unlockBtn.style.display = 'none';
         }
     }
+
+    updateReturnToTodayVisibility();
+}
+
+function updateReturnToTodayVisibility() {
+    const returnBtn = document.getElementById('returnToTodayBtn');
+    if (!returnBtn) return;
+
+    const isDailyActive = document.getElementById('dailyTab') && document.getElementById('dailyTab').classList.contains('active');
+    if (currentDateOffset !== 0 && isDailyActive) {
+        const textSpan = document.getElementById('returnToTodayText');
+        if (textSpan) {
+            if (currentDateOffset < 0) {
+                const daysAgo = Math.abs(currentDateOffset);
+                textSpan.innerText = daysAgo === 1 ? 'دیروز' : `${daysAgo} روز قبل`;
+            } else {
+                textSpan.innerText = currentDateOffset === 1 ? 'فردا' : `${currentDateOffset} روز بعد`;
+            }
+        }
+        returnBtn.classList.remove('hidden');
+    } else {
+        returnBtn.classList.add('hidden');
+    }
+}
+
+function returnToToday() {
+    if (currentDateOffset === 0) return;
+    currentDateOffset = 0;
+    isUnlockedManually = false;
+    updateDateDisplay();
+    loadDayData();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function getMasterHabits() {
@@ -2872,34 +2909,62 @@ function saveCustomSnoozeDurations() {
 
 
 function initCharts() {
+    if (typeof Chart === 'undefined') {
+        console.warn("Chart library not loaded");
+        return;
+    }
     const dailyCtx = document.getElementById('dailyChart');
     if (dailyCtx) {
-        dailyChart = new Chart(dailyCtx.getContext('2d'), {
-            type: 'bar',
-            data: {
-                labels: ['عادات', 'تسک‌ها'],
-                datasets: [{ label: 'درصد پیشرفت', data: [0, 0], backgroundColor: ['#f39c12', '#00cec9'], borderRadius: 6 }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: { legend: { display: false } },
-                scales: { y: { beginAtZero: true, max: 100 } }
+        try {
+            if (dailyChart) {
+                dailyChart.destroy();
+                dailyChart = null;
             }
-        });
+            dailyChart = new Chart(dailyCtx.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['عادات', 'تسک‌ها'],
+                    datasets: [{ label: 'درصد پیشرفت', data: [0, 0], backgroundColor: ['#f39c12', '#00cec9'], borderRadius: 6 }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: true, max: 100 } }
+                }
+            });
+        } catch (e) {
+            console.error("Failed to initialize dailyChart", e);
+        }
     }
 }
 
 function updateDailyChart(data) {
-    if (!dailyChart) return;
-    const hDone = data.habits.length ? Math.round((data.habits.filter(function(h) { return h.completed; }).length / data.habits.length) * 100) : 0;
-    const tDone = data.tasks.length ? Math.round((data.tasks.filter(function(t) { return t.completed; }).length / data.tasks.length) * 100) : 0;
+    const habits = (data && data.habits) || [];
+    const tasks = (data && data.tasks) || [];
+    const all = [...habits, ...tasks];
 
-    dailyChart.data.datasets[0].data = [hDone, tDone];
-    dailyChart.update();
+    const totalPercentEl = document.getElementById('totalPercent');
+    if (totalPercentEl) {
+        totalPercentEl.innerText = `${all.length ? Math.round((all.filter(function(i) { return i.completed; }).length / all.length) * 100) : 0}%`;
+    }
 
-    const all = [...data.habits, ...data.tasks];
-    document.getElementById('totalPercent').innerText = `${all.length ? Math.round((all.filter(function(i) { return i.completed; }).length / all.length) * 100) : 0}%`;
+    if (typeof Chart === 'undefined') return;
+
+    if (!dailyChart) {
+        initCharts();
+        if (!dailyChart) return;
+    }
+
+    try {
+        const hDone = habits.length ? Math.round((habits.filter(function(h) { return h.completed; }).length / habits.length) * 100) : 0;
+        const tDone = tasks.length ? Math.round((tasks.filter(function(t) { return t.completed; }).length / tasks.length) * 100) : 0;
+
+        dailyChart.data.datasets[0].data = [hDone, tDone];
+        dailyChart.update();
+    } catch (e) {
+        console.error("Failed to update dailyChart", e);
+    }
 }
 
 function openReportModal() {
@@ -3031,37 +3096,45 @@ function renderYearlyReport() {
 }
 
 function drawReportChart(labels, data, datasetLabel, color, bgColor) {
+    if (typeof Chart === 'undefined') return;
     const ctx = document.getElementById('reportChart');
     if (ctx) {
-        if (reportChartInstance) reportChartInstance.destroy();
-        reportChartInstance = new Chart(ctx.getContext('2d'), {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: datasetLabel,
-                    data: data,
-                    borderColor: color,
-                    backgroundColor: bgColor,
-                    fill: true,
-                    tension: 0.3,
-                    pointRadius: 4,
-                    pointHoverRadius: 6
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { display: false },
-                    tooltip: { enabled: true, callbacks: { label: function(c) { return ` میزان پیشرفت: ${c.parsed.y}%`; } } }
-                },
-                scales: {
-                    y: { beginAtZero: true, max: 100, ticks: { color: '#888' } },
-                    x: { ticks: { color: '#888', font: { size: 9 } } }
-                }
+        try {
+            if (reportChartInstance) {
+                reportChartInstance.destroy();
+                reportChartInstance = null;
             }
-        });
+            reportChartInstance = new Chart(ctx.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: datasetLabel,
+                        data: data,
+                        borderColor: color,
+                        backgroundColor: bgColor,
+                        fill: true,
+                        tension: 0.3,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { enabled: true, callbacks: { label: function(c) { return ` میزان پیشرفت: ${c.parsed.y}%`; } } }
+                    },
+                    scales: {
+                        y: { beginAtZero: true, max: 100, ticks: { color: '#888' } },
+                        x: { ticks: { color: '#888', font: { size: 9 } } }
+                    }
+                }
+            });
+        } catch (e) {
+            console.error("Failed to draw reportChart", e);
+        }
     }
 }
 
@@ -3103,18 +3176,41 @@ function getBackupJSON() {
 }
 
 function exportBackup() {
+    const btn = document.getElementById('exportBtn');
+    if (btn && btn.disabled) return;
+
+    if (btn) {
+        btn.disabled = true;
+        btn.dataset.origHtml = btn.innerHTML;
+        btn.innerHTML = '<span class="spinner-mini"></span> در حال تهیه و ارسال بک‌آپ...';
+    }
+
     const jsonString = getBackupJSON();
     syncLatestBackupToAndroid();
     if (window.AndroidInterface && window.AndroidInterface.saveBackupToFile) {
         window.AndroidInterface.saveBackupToFile(jsonString);
+        setTimeout(resetExportBtn, 4500);
     } else {
         const blob = new Blob([jsonString], { type: 'application/json' });
         const a = document.createElement('a');
         a.href = URL.createObjectURL ? URL.createObjectURL(blob) : '';
         a.download = `planner_backup_${new Date().toISOString().split('T')[0]}.json`;
         a.click();
+        setTimeout(resetExportBtn, 600);
     }
 }
+
+function resetExportBtn() {
+    const btn = document.getElementById('exportBtn');
+    if (btn && btn.dataset.origHtml) {
+        btn.disabled = false;
+        btn.innerHTML = btn.dataset.origHtml;
+    }
+}
+
+window.onBackupComplete = function(ok, msg) {
+    resetExportBtn();
+};
 
 function openBackupSettingsModal() {
     const modal = document.getElementById('backupSettingsModal');
@@ -3222,6 +3318,9 @@ function saveBackupSettings() {
 }
 
 function testCloudConnection() {
+    const btn = document.getElementById('testCloudConnectionBtn');
+    if (btn && btn.disabled) return;
+
     const platformSelect = document.getElementById('cloudPlatformSelect');
     const botTokenInput = document.getElementById('cloudBotToken');
     const chatIdInput = document.getElementById('cloudChatId');
@@ -3235,12 +3334,32 @@ function testCloudConnection() {
         return;
     }
 
+    if (btn) {
+        btn.disabled = true;
+        btn.dataset.origHtml = btn.innerHTML;
+        btn.innerHTML = '<span class="spinner-mini"></span> در حال بررسی اتصال...';
+    }
+
     if (window.AndroidInterface && window.AndroidInterface.testCloudConnection) {
         window.AndroidInterface.testCloudConnection(platform, botToken, chatId);
+        setTimeout(resetCloudTestBtn, 6000);
     } else {
         alert('تست اتصال فقط درون نسخه اندروید اجرا می‌شود.');
+        resetCloudTestBtn();
     }
 }
+
+function resetCloudTestBtn() {
+    const btn = document.getElementById('testCloudConnectionBtn');
+    if (btn && btn.dataset.origHtml) {
+        btn.disabled = false;
+        btn.innerHTML = btn.dataset.origHtml;
+    }
+}
+
+window.onCloudTestComplete = function(ok, msg) {
+    resetCloudTestBtn();
+};
 
 function getLocalDateKey(d) {
     const dt = d || new Date();
@@ -3385,6 +3504,10 @@ function switchTab(tabName, evt, keepOffset) {
         loadDayData();
     } else if (tabName === 'reminders') {
         loadReminders();
+    }
+
+    if (typeof updateReturnToTodayVisibility === 'function') {
+        updateReturnToTodayVisibility();
     }
 }
 
